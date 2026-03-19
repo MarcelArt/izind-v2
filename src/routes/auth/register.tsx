@@ -3,7 +3,7 @@ import { SignupForm } from '@/components/signup-form';
 import { createFileRoute } from '@tanstack/react-router';
 import { GalleryVerticalEnd } from 'lucide-react';
 
-export const Route = createFileRoute('/register')({
+export const Route = createFileRoute('/auth/register')({
   component: RouteComponent,
   // beforeLoad: authenticated,
 });
