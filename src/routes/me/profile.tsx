@@ -5,11 +5,12 @@ import moment from 'moment';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field, FieldContent, FieldLabel, FieldError } from '@/components/ui/field';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ProfileInputSchema, type BloodType, type Gender, type Profile } from '@/@types/profile.d';
 import { useAuth } from '@/context/auth-context';
 import { getProfileByUserIdOption, upsertProfileOption } from '@/queries/profile.query';
 import { useMemo } from 'react';
+import { toast } from 'sonner';
 
 export const Route = createFileRoute('/me/profile')({
   component: RouteComponent,
@@ -17,12 +18,13 @@ export const Route = createFileRoute('/me/profile')({
 
 function RouteComponent() {
   const { userId, username } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data, error, status } = useQuery(getProfileByUserIdOption(userId));
 
   const profile: Profile = useMemo(() => {
     return status !== 'success'
-      ? {
+      ? ({
           address: '',
           bloodType: 'O',
           city: '',
@@ -43,14 +45,19 @@ function RouteComponent() {
           userId: '',
           village: '',
           updatedAt: new Date(),
-        } satisfies Profile
+        } satisfies Profile)
       : data;
   }, [status, error, data]);
 
   const { mutate } = useMutation(
     upsertProfileOption({
-      onSuccess: () => console.log('success'),
-      onError: (e) => console.log('error', e),
+      onSuccess: () => {
+        toast.success('Profile updated');
+        queryClient.invalidateQueries({
+          queryKey: ['profile-by-user-id', userId],
+        });
+      },
+      onError: (e) => toast.error(e.message),
     })
   );
 
