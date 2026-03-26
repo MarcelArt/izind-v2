@@ -5,10 +5,11 @@ import moment from 'moment';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field, FieldContent, FieldLabel, FieldError } from '@/components/ui/field';
-import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
-import { ProfileInputSchema, type BloodType, type Gender, type Profile, type ProfileInput } from '@/@types/profile.d';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { ProfileInputSchema, type BloodType, type Gender, type Profile } from '@/@types/profile.d';
 import { useAuth } from '@/context/auth-context';
 import { getProfileByUserIdOption, upsertProfileOption } from '@/queries/profile.query';
+import { useMemo } from 'react';
 
 export const Route = createFileRoute('/me/profile')({
   component: RouteComponent,
@@ -17,11 +18,10 @@ export const Route = createFileRoute('/me/profile')({
 function RouteComponent() {
   const { userId, username } = useAuth();
 
-  const { data, error, status } = useSuspenseQuery(getProfileByUserIdOption(userId));
-  console.log('data.bloodType :>> ', data.bloodType);
+  const { data, error, status } = useQuery(getProfileByUserIdOption(userId));
 
-  const profile: Profile =
-    status === 'error' && error.message === 'record not found'
+  const profile: Profile = useMemo(() => {
+    return status !== 'success'
       ? {
           address: '',
           bloodType: 'O',
@@ -43,8 +43,9 @@ function RouteComponent() {
           userId: '',
           village: '',
           updatedAt: new Date(),
-        }
+        } satisfies Profile
       : data;
+  }, [status, error, data]);
 
   const { mutate } = useMutation(
     upsertProfileOption({
