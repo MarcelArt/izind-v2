@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Card, CardContent } from '@/components/ui/card';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { useForm } from '@tanstack/react-form-start';
 import { RegisterInputSchema } from '@/@types/user.d';
@@ -12,10 +12,12 @@ import { Link, useNavigate } from '@tanstack/react-router';
 export function SignupForm({ className, ...props }: React.ComponentProps<'div'>) {
   const navigate = useNavigate();
 
-  const { mutate } = useMutation(registerMutation({
-    onSuccess: () => navigate({ to: '/auth/login' }),
-    onError: (e) => console.log('e :>> ', e),
-  }));
+  const { mutate, isPending } = useMutation(
+    registerMutation({
+      onSuccess: () => navigate({ to: '/auth/login' }),
+      onError: (e) => console.log('e :>> ', e),
+    })
+  );
 
   const form = useForm({
     defaultValues: {
@@ -30,27 +32,52 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
   });
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Create your account</CardTitle>
-          <CardDescription>Enter your NIK below to create your account</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className={cn('flex flex-col gap-5', className)} {...props}>
+      <Card className="border border-border bg-card">
+        <CardContent className="p-5">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               form.handleSubmit();
             }}
+            className="space-y-4"
           >
-            <FieldGroup>
+            <form.Field
+              name="username"
+              children={(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      NIK
+                    </FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      type="text"
+                      placeholder="16+ digits"
+                      required
+                      className="h-9 text-sm"
+                    />
+                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  </Field>
+                );
+              }}
+            />
+            <div className="grid gap-3 sm:grid-cols-2">
               <form.Field
-                name="username"
+                name="password"
                 children={(field) => {
                   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                     <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>NIK</FieldLabel>
+                      <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                        Password
+                      </FieldLabel>
                       <Input
                         id={field.name}
                         name={field.name}
@@ -58,79 +85,55 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
                         aria-invalid={isInvalid}
-                        type="text"
-                        placeholder="NIK"
+                        type="password"
+                        placeholder="6+ characters"
                         required
+                        className="h-9 text-sm"
                       />
                       {isInvalid && <FieldError errors={field.state.meta.errors} />}
                     </Field>
                   );
                 }}
               />
-              <Field>
-                <Field className="grid grid-cols-2 gap-4">
-                  <form.Field
-                    name="password"
-                    children={(field) => {
-                      const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                      return (
-                        <Field data-invalid={isInvalid}>
-                          <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                          <Input
-                            id={field.name}
-                            name={field.name}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            aria-invalid={isInvalid}
-                            type="password"
-                            placeholder="Password"
-                            required
-                          />
-                          {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                        </Field>
-                      );
-                    }}
-                  />
-                  <form.Field
-                    name="confirmPassword"
-                    children={(field) => {
-                      const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                      return (
-                        <Field data-invalid={isInvalid}>
-                          <FieldLabel htmlFor={field.name}>Confirm Password</FieldLabel>
-                          <Input
-                            id={field.name}
-                            name={field.name}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            aria-invalid={isInvalid}
-                            type="password"
-                            placeholder="Confirm Password"
-                            required
-                          />
-                          {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                        </Field>
-                      );
-                    }}
-                  />
-                </Field>
-                <FieldDescription>Must be at least 6 characters long.</FieldDescription>
-              </Field>
-              <Field>
-                <Button type="submit">Create Account</Button>
-                <FieldDescription className="text-center">
-                  Already have an account? <Link to='/auth/login'>Sign in</Link>
-                </FieldDescription>
-              </Field>
-            </FieldGroup>
+              <form.Field
+                name="confirmPassword"
+                children={(field) => {
+                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                        Confirm
+                      </FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        type="password"
+                        placeholder="Re-enter"
+                        required
+                        className="h-9 text-sm"
+                      />
+                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    </Field>
+                  );
+                }}
+              />
+            </div>
+            <Button disabled={isPending} type="submit" className="h-9 w-full text-sm">
+              {isPending ? 'Creating account...' : 'Create account'}
+            </Button>
           </form>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-      </FieldDescription>
+      <p className="text-center text-xs text-muted-foreground">
+        Already have an account?{' '}
+        <Link to="/auth/login" className="font-medium text-primary hover:underline">
+          Sign in
+        </Link>
+      </p>
     </div>
   );
 }

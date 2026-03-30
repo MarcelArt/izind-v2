@@ -11,6 +11,7 @@ import { useAuth } from '@/context/auth-context';
 import { getProfileByUserIdOption, upsertProfileOption } from '@/queries/profile.query';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
+import { User, MapPin, Briefcase, Save } from 'lucide-react';
 
 export const Route = createFileRoute('/me/profile')({
   component: RouteComponent,
@@ -49,10 +50,10 @@ function RouteComponent() {
       : data;
   }, [status, error, data]);
 
-  const { mutate } = useMutation(
+  const { mutate, isPending } = useMutation(
     upsertProfileOption({
       onSuccess: () => {
-        toast.success('Profile updated');
+        toast.success('Profile updated successfully');
         queryClient.invalidateQueries({
           queryKey: ['profile-by-user-id', userId],
         });
@@ -97,258 +98,431 @@ function RouteComponent() {
   });
 
   return (
-    <div className="container mx-auto px-8 py-8">
-      <h1 className="mb-8 text-2xl font-semibold">My Profile</h1>
+    <div className="container-custom py-6">
+      <div className="mb-6 flex items-center gap-3">
+        <div className="flex size-8 items-center justify-center rounded-lg bg-primary/20 text-primary">
+          <User className="size-4" />
+        </div>
+        <div>
+          <h1 className="text-lg font-semibold">Profile Settings</h1>
+          <p className="mt-0.5 text-xs text-muted-foreground">Manage your personal information</p>
+        </div>
+      </div>
+
       <form
         onSubmit={(e) => {
-          console.log('clicked');
           e.preventDefault();
           form.handleSubmit();
         }}
-        className="space-y-6"
+        className="space-y-5"
       >
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <form.Field
-            name="nik"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>NIK</FieldLabel>
-                <FieldContent>
-                  <Input disabled id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
+        <div className="overflow-hidden rounded-md border border-border bg-card">
+          <div className="border-b border-border bg-muted/30 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <User className="size-3.5 text-primary" />
+              <h2 className="text-sm font-semibold">Personal Information</h2>
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <form.Field
+                name="nik"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      NIK
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        disabled
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 bg-muted/50 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
 
-          <form.Field
-            name="name"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
+              <form.Field
+                name="name"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      Full Name
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
+            </div>
+
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-4">
+              <form.Field
+                name="placeOfBirth"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      Place of Birth
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
+
+              <form.Field
+                name="dateOfBirthStr"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      Date of Birth
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type="date"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
+
+              <form.Field
+                name="gender"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      Gender
+                    </FieldLabel>
+                    <FieldContent>
+                      <select
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value.toString()}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value as Gender)}
+                        className="flex h-8 w-full items-center justify-between rounded-md border border-input bg-background px-2 py-1.5 text-xs font-medium shadow-sm placeholder:text-muted-foreground focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="">Select</option>
+                        <option value="L">Male</option>
+                        <option value="P">Female</option>
+                      </select>
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
+
+              <form.Field
+                name="bloodType"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      Blood Type
+                    </FieldLabel>
+                    <FieldContent>
+                      <select
+                        id={field.name}
+                        name={field.name}
+                        value={String(field.state.value)}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value as BloodType)}
+                        className="flex h-8 w-full items-center justify-between rounded-md border border-input bg-background px-2 py-1.5 text-xs font-medium shadow-sm placeholder:text-muted-foreground focus:border-transparent focus:ring-2 focus:ring-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <option value="">Select</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="O">O</option>
+                      </select>
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-          <form.Field
-            name="placeOfBirth"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Place of Birth</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
+        <div className="overflow-hidden rounded-md border border-border bg-card">
+          <div className="border-b border-border bg-muted/30 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <MapPin className="size-3.5 text-primary" />
+              <h2 className="text-sm font-semibold">Address Information</h2>
+            </div>
+          </div>
+          <div className="p-4">
+            <form.Field
+              name="address"
+              children={(field) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                    Full Address
+                  </FieldLabel>
+                  <FieldContent>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      className="h-8 text-xs"
+                    />
+                  </FieldContent>
+                  <FieldError errors={field.state.meta.errors} />
+                </Field>
+              )}
+            />
 
-          <form.Field
-            name="dateOfBirthStr"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Date of Birth</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} type="date" value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-5">
+              <form.Field
+                name="rt"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      RT
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
 
-          <form.Field
-            name="gender"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
-                <FieldContent>
-                  <select
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value.toString()}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value as Gender)}
-                    className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">Select gender</option>
-                    <option value="L">Male</option>
-                    <option value="P">Female</option>
-                  </select>
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
+              <form.Field
+                name="rw"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      RW
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
 
-          <form.Field
-            name="bloodType"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Blood Type</FieldLabel>
-                <FieldContent>
-                  <select
-                    id={field.name}
-                    name={field.name}
-                    value={String(field.state.value)}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value as BloodType)}
-                    className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">Select blood type</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="AB">AB</option>
-                    <option value="O">O</option>
-                  </select>
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
+              <form.Field
+                name="village"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      Village
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
+
+              <form.Field
+                name="district"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      District
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
+
+              <form.Field
+                name="city"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      City
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
+            </div>
+          </div>
         </div>
 
-        <form.Field
-          name="address"
-          children={(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>Address</FieldLabel>
-              <FieldContent>
-                <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-              </FieldContent>
-              <FieldError errors={field.state.meta.errors} />
-            </Field>
-          )}
-        />
+        <div className="overflow-hidden rounded-md border border-border bg-card">
+          <div className="border-b border-border bg-muted/30 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Briefcase className="size-3.5 text-primary" />
+              <h2 className="text-sm font-semibold">Professional Information</h2>
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+              <form.Field
+                name="religion"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      Religion
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
-          <form.Field
-            name="rt"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>RT</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
+              <form.Field
+                name="maritalStatus"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      Marital Status
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
 
-          <form.Field
-            name="rw"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>RW</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
+              <form.Field
+                name="job"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      Job
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
 
-          <form.Field
-            name="village"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Village</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
-
-          <form.Field
-            name="district"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>District</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
-
-          <form.Field
-            name="city"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>City</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
+              <form.Field
+                name="nationality"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name} className="text-xs font-medium">
+                      Nationality
+                    </FieldLabel>
+                    <FieldContent>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </FieldContent>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-          <form.Field
-            name="religion"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Religion</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
-
-          <form.Field
-            name="maritalStatus"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Marital Status</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
-
-          <form.Field
-            name="job"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Job</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
-
-          <form.Field
-            name="nationality"
-            children={(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Nationality</FieldLabel>
-                <FieldContent>
-                  <Input id={field.name} name={field.name} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          />
-        </div>
-
-        <div className="flex justify-end gap-4">
-          <Button type="submit">Save Changes</Button>
+        <div className="flex justify-end gap-2">
+          <Button type="submit" disabled={isPending} className="h-9 gap-1.5 text-sm">
+            <Save className="size-3.5" />
+            {isPending ? 'Saving...' : 'Save Changes'}
+          </Button>
         </div>
       </form>
     </div>
