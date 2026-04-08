@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm';
-import { pgTable, text, timestamp, boolean, index, serial, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, index, serial, pgEnum, integer } from 'drizzle-orm/pg-core';
 
+// ==================== Start of better-auth ====================
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -75,16 +76,47 @@ export const verification = pgTable(
   (table) => [index('verification_identifier_idx').on(table.identifier)]
 );
 
+export const userRelations = relations(user, ({ many }) => ({
+  sessions: many(session),
+  accounts: many(account),
+  profiles: many(profiles),
+}));
+
+
+export const sessionRelations = relations(session, ({ one }) => ({
+  user: one(user, {
+    fields: [session.userId],
+    references: [user.id],
+  }),
+}));
+
+export const accountRelations = relations(account, ({ one }) => ({
+  user: one(user, {
+    fields: [account.userId],
+    references: [user.id],
+  }),
+}));
+// ==================== End of better-auth ====================
+
+const baseSchema = {
+  id: serial('id').primaryKey(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at')
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
+};
+
 export const Genders = ['L', 'P'] as const;
-const genders = pgEnum('genders', Genders);
+export const genders = pgEnum('genders', Genders);
 
 export const BloodTypes = ['A', 'B', 'AB', 'O'] as const;
-const bloodTypes = pgEnum('blood_types', BloodTypes);
+export const bloodTypes = pgEnum('blood_types', BloodTypes);
 
 export const profiles = pgTable(
   'profiles',
   {
-    id: serial('id').primaryKey(),
+    ...baseSchema,
     nik: text('nik').notNull(),
     name: text('name').notNull(),
     placeOfBirth: text('place_of_birth').notNull(),
@@ -104,21 +136,9 @@ export const profiles = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-    updatedAt: timestamp('updated_at')
-      .defaultNow()
-      .$onUpdate(() => /* @__PURE__ */ new Date())
-      .notNull(),
   },
   (table) => [index('profile_userId_idx').on(table.userId)]
-);
-
-export const userRelations = relations(user, ({ many }) => ({
-  sessions: many(session),
-  accounts: many(account),
-  profiles: many(profiles),
-}));
-
+); 
 export const profileRelations = relations(profiles, ({ one }) => ({
   user: one(user, {
     fields: [profiles.userId],
@@ -126,16 +146,21 @@ export const profileRelations = relations(profiles, ({ one }) => ({
   }),
 }));
 
-export const sessionRelations = relations(session, ({ one }) => ({
-  user: one(user, {
-    fields: [session.userId],
-    references: [user.id],
-  }),
-}));
-
-export const accountRelations = relations(account, ({ one }) => ({
-  user: one(user, {
-    fields: [account.userId],
-    references: [user.id],
+export const documents = pgTable(
+  'documents',
+  {
+    ...baseSchema,
+    filename: text('filename').notNull(),
+    path: text('path').notNull(),
+    type: text('type').notNull(),
+    tags: text('tags').array(),
+    profileId: integer('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  },
+  (table) => [index('document_profileId_idx').on(table.profileId)],
+);
+export const documentRelations = relations(documents, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [documents.profileId],
+    references: [profiles.id],
   }),
 }));
