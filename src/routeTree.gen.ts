@@ -16,6 +16,7 @@ import { Route as MeProfileRouteImport } from './routes/me/profile'
 import { Route as MeDocumentsRouteImport } from './routes/me/documents'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as ApiDocumentsUploadRouteImport } from './routes/api/documents/upload'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const MeRoute = MeRouteImport.update({
@@ -53,6 +54,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRoute,
 } as any)
+const ApiDocumentsUploadRoute = ApiDocumentsUploadRouteImport.update({
+  id: '/api/documents/upload',
+  path: '/api/documents/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/me/documents': typeof MeDocumentsRoute
   '/me/profile': typeof MeProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/documents/upload': typeof ApiDocumentsUploadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/me/documents': typeof MeDocumentsRoute
   '/me/profile': typeof MeProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/documents/upload': typeof ApiDocumentsUploadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/me/documents': typeof MeDocumentsRoute
   '/me/profile': typeof MeProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/documents/upload': typeof ApiDocumentsUploadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/me/documents'
     | '/me/profile'
     | '/api/auth/$'
+    | '/api/documents/upload'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/me/documents'
     | '/me/profile'
     | '/api/auth/$'
+    | '/api/documents/upload'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/me/documents'
     | '/me/profile'
     | '/api/auth/$'
+    | '/api/documents/upload'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   MeRoute: typeof MeRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiDocumentsUploadRoute: typeof ApiDocumentsUploadRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/api/documents/upload': {
+      id: '/api/documents/upload'
+      path: '/api/documents/upload'
+      fullPath: '/api/documents/upload'
+      preLoaderRoute: typeof ApiDocumentsUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   MeRoute: MeRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiDocumentsUploadRoute: ApiDocumentsUploadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
