@@ -13,6 +13,7 @@ import { Route as MeRouteImport } from './routes/me'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MeProfileRouteImport } from './routes/me/profile'
+import { Route as MeDocumentsRouteImport } from './routes/me/documents'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -37,6 +38,11 @@ const MeProfileRoute = MeProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => MeRoute,
 } as any)
+const MeDocumentsRoute = MeDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => MeRoute,
+} as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/me': typeof MeRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/me/documents': typeof MeDocumentsRoute
   '/me/profile': typeof MeProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/me': typeof MeRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/me/documents': typeof MeDocumentsRoute
   '/me/profile': typeof MeProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/me': typeof MeRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/me/documents': typeof MeDocumentsRoute
   '/me/profile': typeof MeProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/auth/login'
     | '/auth/register'
+    | '/me/documents'
     | '/me/profile'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/auth/login'
     | '/auth/register'
+    | '/me/documents'
     | '/me/profile'
     | '/api/auth/$'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/auth/login'
     | '/auth/register'
+    | '/me/documents'
     | '/me/profile'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -148,6 +160,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MeProfileRouteImport
       parentRoute: typeof MeRoute
     }
+    '/me/documents': {
+      id: '/me/documents'
+      path: '/documents'
+      fullPath: '/me/documents'
+      preLoaderRoute: typeof MeDocumentsRouteImport
+      parentRoute: typeof MeRoute
+    }
     '/auth/register': {
       id: '/auth/register'
       path: '/register'
@@ -185,10 +204,12 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface MeRouteChildren {
+  MeDocumentsRoute: typeof MeDocumentsRoute
   MeProfileRoute: typeof MeProfileRoute
 }
 
 const MeRouteChildren: MeRouteChildren = {
+  MeDocumentsRoute: MeDocumentsRoute,
   MeProfileRoute: MeProfileRoute,
 }
 

@@ -51,6 +51,10 @@ const data = {
           title: 'Work Experience',
           url: '#',
         },
+        {
+          title: 'Documents',
+          url: '/me/documents',
+        },
       ],
     },
   ],
