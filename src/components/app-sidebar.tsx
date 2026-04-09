@@ -41,7 +41,7 @@ const data = {
       items: [
         {
           title: 'Profile',
-          url: '#',
+          url: '/me/profile',
         },
         {
           title: 'Education',

@@ -3,15 +3,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/auth-context';
 import { getProfileByUserIdOption } from '@/queries/profile.query';
 import { getDocumentsByProfileIdOption } from '@/queries/document.query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -25,59 +18,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   FileIcon,
-  MoreVerticalIcon,
   PlusIcon,
   SearchIcon,
   GridIcon,
   ListIcon,
-  IdCardIcon,
-  HomeIcon,
-  BookIcon,
-  AwardIcon,
-  CarIcon,
   UploadIcon,
-  XIcon,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-
-export type DocumentType = 'id card' | 'kk' | 'passport' | 'certificate' | 'driving license' | 'other';
+import { DocumentGridCard, DocumentListItem, type DocumentType } from '@/components/document-card';
 
 export const Route = createFileRoute('/me/documents')({
   component: RouteComponent,
 });
-
-function getFileIcon(type: DocumentType) {
-  const iconMap: Record<DocumentType, React.ReactNode> = {
-    'id card': <IdCardIcon className="text-blue-500" />,
-    'kk': <HomeIcon className="text-green-500" />,
-    'passport': <BookIcon className="text-purple-500" />,
-    'certificate': <AwardIcon className="text-yellow-500" />,
-    'driving license': <CarIcon className="text-orange-500" />,
-    'other': <FileIcon className="text-gray-400" />,
-  };
-  return iconMap[type] || <FileIcon className="text-gray-400" />;
-}
-
-function getDocumentTypeLabel(type: DocumentType): string {
-  const labels: Record<DocumentType, string> = {
-    'id card': 'ID Card',
-    'kk': 'Family Card (KK)',
-    'passport': 'Passport',
-    'certificate': 'Certificate',
-    'driving license': 'Driving License',
-    'other': 'Other',
-  };
-  return labels[type] || type;
-}
-
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(date));
-}
 
 function RouteComponent() {
   const { userId } = useAuth();
@@ -137,8 +90,6 @@ function RouteComponent() {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to upload document');
       }
-
-      const result = await response.json();
 
       toast.success('Document uploaded successfully');
       setIsUploadDialogOpen(false);
@@ -362,85 +313,14 @@ function RouteComponent() {
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredDocuments.map((doc) => (
-            <Card key={doc.id} className="group cursor-pointer transition-all hover:shadow-md">
-              <CardHeader className="p-4">
-                <div className="mb-3 flex items-start justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">{getFileIcon(doc.type as DocumentType)}</div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100">
-                        <MoreVerticalIcon className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Open</DropdownMenuItem>
-                      <DropdownMenuItem>Download</DropdownMenuItem>
-                      <DropdownMenuItem>Rename</DropdownMenuItem>
-                      <DropdownMenuItem>Share</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <CardTitle className="truncate text-base">{doc.filename}</CardTitle>
-                <CardDescription className="line-clamp-2">{doc.path}</CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="flex flex-wrap gap-1">
-                  <Badge variant="outline" className="text-xs">
-                    {getDocumentTypeLabel(doc.type as DocumentType)}
-                  </Badge>
-                  {doc.tags?.slice(0, 2).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                  {doc.tags && doc.tags.length > 2 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{doc.tags.length - 2}
-                    </Badge>
-                  )}
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground">{formatDate(doc.updatedAt)}</p>
-              </CardContent>
-            </Card>
+            <DocumentGridCard key={doc.id} document={doc} />
           ))}
         </div>
       ) : (
         <Card>
           <div className="divide-y">
             {filteredDocuments.map((doc) => (
-              <div key={doc.id} className="flex items-center gap-4 p-4 transition-colors hover:bg-muted/50">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">{getFileIcon(doc.type as DocumentType)}</div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{doc.filename}</p>
-                  <p className="truncate text-xs text-muted-foreground">{doc.path}</p>
-                </div>
-                <Badge variant="outline" className="text-xs whitespace-nowrap">
-                  {getDocumentTypeLabel(doc.type as DocumentType)}
-                </Badge>
-                <div className="flex flex-wrap gap-1">
-                  {doc.tags?.slice(0, 2).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground">{formatDate(doc.updatedAt)}</p>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreVerticalIcon className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Open</DropdownMenuItem>
-                    <DropdownMenuItem>Download</DropdownMenuItem>
-                    <DropdownMenuItem>Rename</DropdownMenuItem>
-                    <DropdownMenuItem>Share</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              <DocumentListItem key={doc.id} document={doc} />
             ))}
           </div>
         </Card>
