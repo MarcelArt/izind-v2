@@ -1,32 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/auth-context';
 import { getProfileByUserIdOption } from '@/queries/profile.query';
-import { getDocumentsByProfileIdOption } from '@/queries/document.query';
+import { getDocumentsByProfileIdOption, updateDocumentOption } from '@/queries/document.query';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  FileIcon,
-  PlusIcon,
-  SearchIcon,
-  GridIcon,
-  ListIcon,
-  UploadIcon,
-} from 'lucide-react';
+import { FileIcon, PlusIcon, SearchIcon, GridIcon, ListIcon, UploadIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { DocumentGridCard, DocumentListItem, type DocumentType } from '@/components/document-card';
+import { type Document } from '@/@types/document.d';
+import { useForm } from '@tanstack/react-form';
+import { Field, FieldContent, FieldLabel, FieldError } from '@/components/ui/field';
 
 export const Route = createFileRoute('/me/documents')({
   component: RouteComponent,
@@ -158,22 +146,11 @@ function RouteComponent() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="file">File</Label>
-                <Input
-                  id="file"
-                  type="file"
-                  onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                  disabled={isUploading}
-                />
+                <Input id="file" type="file" onChange={(e) => setUploadFile(e.target.files?.[0] || null)} disabled={isUploading} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="filename">Filename</Label>
-                <Input
-                  id="filename"
-                  placeholder="Enter filename"
-                  value={uploadFilename}
-                  onChange={(e) => setUploadFilename(e.target.value)}
-                  disabled={isUploading}
-                />
+                <Input id="filename" placeholder="Enter filename" value={uploadFilename} onChange={(e) => setUploadFilename(e.target.value)} disabled={isUploading} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="type">Document Type</Label>
@@ -194,21 +171,11 @@ function RouteComponent() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags (comma separated)</Label>
-                <Input
-                  id="tags"
-                  placeholder="e.g. personal, important, 2024"
-                  value={uploadTags}
-                  onChange={(e) => setUploadTags(e.target.value)}
-                  disabled={isUploading}
-                />
+                <Input id="tags" placeholder="e.g. personal, important, 2024" value={uploadTags} onChange={(e) => setUploadTags(e.target.value)} disabled={isUploading} />
               </div>
             </div>
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsUploadDialogOpen(false)}
-                disabled={isUploading}
-              >
+              <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)} disabled={isUploading}>
                 Cancel
               </Button>
               <Button onClick={handleUpload} disabled={isUploading}>
@@ -231,58 +198,30 @@ function RouteComponent() {
 
       {/* Search Bar and Type Filter */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 max-w-md">
+        <div className="relative max-w-md flex-1">
           <SearchIcon className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search documents..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant={selectedType === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedType('all')}
-          >
+          <Button variant={selectedType === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedType('all')}>
             All
           </Button>
-          <Button
-            variant={selectedType === 'id card' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedType('id card')}
-          >
+          <Button variant={selectedType === 'id card' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedType('id card')}>
             ID Card
           </Button>
-          <Button
-            variant={selectedType === 'kk' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedType('kk')}
-          >
+          <Button variant={selectedType === 'kk' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedType('kk')}>
             KK
           </Button>
-          <Button
-            variant={selectedType === 'passport' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedType('passport')}
-          >
+          <Button variant={selectedType === 'passport' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedType('passport')}>
             Passport
           </Button>
-          <Button
-            variant={selectedType === 'certificate' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedType('certificate')}
-          >
+          <Button variant={selectedType === 'certificate' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedType('certificate')}>
             Certificate
           </Button>
-          <Button
-            variant={selectedType === 'driving license' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedType('driving license')}
-          >
+          <Button variant={selectedType === 'driving license' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedType('driving license')}>
             License
           </Button>
-          <Button
-            variant={selectedType === 'other' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedType('other')}
-          >
+          <Button variant={selectedType === 'other' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedType('other')}>
             Other
           </Button>
         </div>
@@ -302,29 +241,171 @@ function RouteComponent() {
       </div>
 
       {/* Documents Grid/List */}
-      {filteredDocuments.length === 0 ? (
-        <Card className="p-12 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-            <FileIcon className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <CardTitle className="mb-2">No documents found</CardTitle>
-          <CardDescription>{searchQuery ? 'Try adjusting your search query' : 'Upload your first document to get started'}</CardDescription>
-        </Card>
-      ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredDocuments.map((doc) => (
-            <DocumentGridCard key={doc.id} document={doc} />
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <div className="divide-y">
-            {filteredDocuments.map((doc) => (
-              <DocumentListItem key={doc.id} document={doc} />
-            ))}
-          </div>
-        </Card>
-      )}
+      <DocumentsListComponent docs={filteredDocuments} searchQuery={searchQuery} viewMode={viewMode} />
     </div>
+  );
+}
+
+interface UpdateDocumentDialogProps {
+  document: Document;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}
+
+function UpdateDocumentDialog({ document, isOpen, setIsOpen }: UpdateDocumentDialogProps) {
+  const queryClient = useQueryClient();
+
+  const { mutate } = useMutation(
+    updateDocumentOption({
+      onSuccess: () => {
+        toast.success('Document updated successfully');
+        setIsOpen(false);
+        queryClient.invalidateQueries({
+          queryKey: ['documents-by-profile-id', document.profileId],
+        });
+      },
+      onError: () => {
+        toast.error('Failed to update document');
+      },
+    })
+  );
+
+  const form = useForm({
+    defaultValues: {
+      type: document.type as DocumentType,
+      tagsStr: document.tags?.join(',') || '',
+    },
+    onSubmit: async ({ value }) => {
+      const tags = value.tagsStr
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length > 0);
+
+      mutate({
+        id: document.id,
+        input: {
+          filename: document.filename,
+          path: document.path,
+          type: value.type,
+          tags,
+          profileId: document.profileId,
+        },
+      });
+    },
+  });
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Update Document</DialogTitle>
+          <DialogDescription>You may only change the type and tags</DialogDescription>
+        </DialogHeader>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="space-y-4 py-4"
+        >
+          <form.Field
+            name="type"
+            children={(field) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>Document Type</FieldLabel>
+                <FieldContent>
+                  <select
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value as DocumentType)}
+                    className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="id card">ID Card</option>
+                    <option value="kk">Family Card (KK)</option>
+                    <option value="passport">Passport</option>
+                    <option value="certificate">Certificate</option>
+                    <option value="driving license">Driving License</option>
+                    <option value="other">Other</option>
+                  </select>
+                </FieldContent>
+                <FieldError errors={field.state.meta.errors} />
+              </Field>
+            )}
+          />
+
+          <form.Field
+            name="tagsStr"
+            children={(field) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>Tags (comma separated)</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    placeholder="e.g. personal, important, 2024"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                  />
+                </FieldContent>
+                <FieldError errors={field.state.meta.errors} />
+              </Field>
+            )}
+          />
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              <UploadIcon className="mr-2 h-4 w-4" />
+              Save
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface DocumentListComponentProps {
+  docs: Document[];
+  viewMode: 'grid' | 'list';
+  searchQuery: string;
+}
+
+function DocumentsListComponent({ docs, viewMode, searchQuery }: DocumentListComponentProps) {
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+
+  return docs.length === 0 ? (
+    <Card className="p-12 text-center">
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+        <FileIcon className="h-8 w-8 text-muted-foreground" />
+      </div>
+      <CardTitle className="mb-2">No documents found</CardTitle>
+      <CardDescription>{searchQuery ? 'Try adjusting your search query' : 'Upload your first document to get started'}</CardDescription>
+    </Card>
+  ) : viewMode === 'grid' ? (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {docs.map((doc) => (
+        <>
+          <DocumentGridCard key={doc.id} document={doc} onUpdateClicked={() => setIsUpdateDialogOpen(true)} />
+          <UpdateDocumentDialog key={doc.id} document={doc} isOpen={isUpdateDialogOpen} setIsOpen={setIsUpdateDialogOpen} />
+        </>
+      ))}
+    </div>
+  ) : (
+    <Card>
+      <div className="divide-y">
+        {docs.map((doc) => (
+          <>
+            <DocumentListItem key={doc.id} document={doc} onUpdateClicked={() => setIsUpdateDialogOpen(true)} />
+            <UpdateDocumentDialog key={doc.id} document={doc} isOpen={isUpdateDialogOpen} setIsOpen={setIsUpdateDialogOpen} />
+          </>
+        ))}
+      </div>
+    </Card>
   );
 }

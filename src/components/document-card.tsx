@@ -43,6 +43,7 @@ function formatDate(date: Date): string {
 
 interface DocumentGridCardProps {
   document: Document;
+  onUpdateClicked: () => void;
 }
 
 function isImageFile(path: string): boolean {
@@ -50,7 +51,7 @@ function isImageFile(path: string): boolean {
   return imageExtensions.some((ext) => path.toLowerCase().endsWith(ext));
 }
 
-export function DocumentGridCard({ document }: DocumentGridCardProps) {
+export function DocumentGridCard({ document, onUpdateClicked }: DocumentGridCardProps) {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const isImage = isImageFile(document.path);
 
@@ -75,7 +76,7 @@ export function DocumentGridCard({ document }: DocumentGridCardProps) {
               <DropdownMenuItem>
                 <a href={document.path}>Download</a>
               </DropdownMenuItem>
-              <DropdownMenuItem>Rename</DropdownMenuItem>
+              <DropdownMenuItem onClick={onUpdateClicked}>Update</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setIsShareOpen(true)}>Share</DropdownMenuItem>
               <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
             </DropdownMenuContent>
@@ -109,9 +110,10 @@ export function DocumentGridCard({ document }: DocumentGridCardProps) {
 
 interface DocumentListItemProps {
   document: Document;
+  onUpdateClicked: () => void;
 }
 
-export function DocumentListItem({ document }: DocumentListItemProps) {
+export function DocumentListItem({ document, onUpdateClicked }: DocumentListItemProps) {
   const [isShareOpen, setIsShareOpen] = useState(false);
 
   return (
@@ -142,7 +144,7 @@ export function DocumentListItem({ document }: DocumentListItemProps) {
           <DropdownMenuItem>
             <a href={document.path}>Download</a>
           </DropdownMenuItem>
-          <DropdownMenuItem>Rename</DropdownMenuItem>
+          <DropdownMenuItem onClick={onUpdateClicked}>Update</DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsShareOpen(true)}>Share</DropdownMenuItem>
           <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
         </DropdownMenuContent>
