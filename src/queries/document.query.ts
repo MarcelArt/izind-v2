@@ -1,18 +1,18 @@
 import { getDocumentsByProfileId, getDocumentById, createDocument, updateDocument, deleteDocument } from "@/functions/document.fn";
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
-import type { MutationCallbacks } from ".";
+import { QUERY_KEYS, type MutationCallbacks } from ".";
 import type { DocumentInput } from "@/@types/document";
 
 export function getDocumentsByProfileIdOption(profileId: number) {
     return queryOptions({
-        queryKey: ['documents-by-profile-id', profileId],
+        queryKey: [QUERY_KEYS.MY_DOCUMENTS, profileId],
         queryFn: () => getDocumentsByProfileId({ data: profileId }),
     });
 }
 
 export function getDocumentByIdOption(id: number) {
     return queryOptions({
-        queryKey: ['document-by-id', id],
+        queryKey: [QUERY_KEYS.ONE_DOCUMENT, id],
         queryFn: () => getDocumentById({ data: id }),
     });
 }

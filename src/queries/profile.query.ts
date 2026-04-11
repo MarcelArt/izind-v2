@@ -1,11 +1,11 @@
 import { getProfileByUserId, upsertProfile } from "@/functions/profile.fn";
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
-import type { MutationCallbacks } from ".";
+import { QUERY_KEYS, type MutationCallbacks } from ".";
 import type { ProfileInput } from "@/@types/profile";
 
 export function getProfileByUserIdOption(userId: string) {
     return queryOptions({
-        queryKey: ['profile-by-user-id', userId],
+        queryKey: [QUERY_KEYS.MY_PROFILE, userId],
         queryFn: () => getProfileByUserId({ data: userId }),
     });
 }
