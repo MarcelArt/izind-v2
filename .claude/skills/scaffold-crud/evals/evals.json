@@ -1,0 +1,23 @@
+{
+  "skill_name": "scaffold-crud",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create CRUD operations for the educations table. Use profileId for listing.",
+      "expected_output": "Should create 4 files: src/@types/education.d.ts, src/repositories/education.repo.ts, src/functions/education.fn.ts, src/queries/education.query.ts. Should also update src/queries/index.ts with MY_EDUCATIONS and ONE_EDUCATION keys.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I need full CRUD scaffolding for a new skill resource. The table is called 'skills' in the schema and it should list by profileId.",
+      "expected_output": "Should create 4 files: src/@types/skill.d.ts, src/repositories/skill.repo.ts, src/functions/skill.fn.ts, src/queries/skill.query.ts. Should use 'skill' (singular) for resource name. Should update QUERY_KEYS.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Scaffold the experiences resource - the table name is experiences and list by userId",
+      "expected_output": "Should create 4 files using 'experience' (singular) as the resource name, 'experiences' as the table name. The list method should be getByUserId. Should update QUERY_KEYS with MY_EXPERIENCES and ONE_EXPERIENCE.",
+      "files": []
+    }
+  ]
+}

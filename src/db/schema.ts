@@ -164,3 +164,30 @@ export const documentRelations = relations(documents, ({ one }) => ({
     references: [profiles.id],
   }),
 }));
+
+export const educations = pgTable(
+  'educations',
+  {
+    ...baseSchema,
+    school: text('school').notNull(),
+    degree: text('degree').notNull(),
+    fieldOfStudy: text('field_of_study').notNull(),
+    startDate: timestamp('start_date').notNull(),
+    endDate: timestamp('end_date'),
+    grade: text('grade'),
+    maxGrade: text('max_grade'),
+    description: text('description'),
+    documentId: integer('document_id').notNull().references(() => documents.id, { onDelete: 'cascade' }),
+    profileId: integer('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  }
+);
+export const educationRelations = relations(educations, ({ one }) => ({
+  document: one(documents, {
+    fields: [educations.documentId],
+    references: [documents.id],
+  }),
+  profile: one(profiles, {
+    fields: [educations.profileId],
+    references: [profiles.id],
+  }),
+}));
